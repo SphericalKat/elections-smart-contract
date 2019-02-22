@@ -1,5 +1,0 @@
-import web3 from './web3';
-
-const address = '0x5faCb8d2a3dB18F0dfB97f0b25f110cFbd01d6aF';
-const abi = '[{"constant":true,"inputs":[],"name":"getBalance","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"newPrice","type":"uint256"}],"name":"setCreditPrice","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_creditsAmount","type":"uint256"}],"name":"purchaseCredits","outputs":[],"payable":true,"stateMutability":"payable","type":"function"},{"constant":true,"inputs":[],"name":"admin","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"CURRENT_CREDIT_PRICE","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[{"name":"initPrice","type":"uint256"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"}]';
-export default new web3.eth.Contract(JSON.parse(abi), address);

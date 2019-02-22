@@ -1,59 +1,90 @@
 import React, { Component } from 'react';
 import './App.css';
 import web3 from './web3';
-import energyCredits from './energy_credits';
+import election from './election';
 
 class App extends Component {
-  state = { currentPrice: '',
-            balance: '',
-            creditsToBuy: '',
-            message: ''
-  };
+    state = {
+        candidateId: '',
+        message: '',
+        bjpVotes: 0,
+        incVotes: 0,
+        aapVotes: 0,
+        sipVotes: 0,
+        notaVotes: 0
+    };
 
-  async componentDidMount() {
-      const accounts = await web3.eth.getAccounts();
-      const currentPrice = await energyCredits.methods.CURRENT_CREDIT_PRICE().call();
-      const balance = await energyCredits.methods.getBalance().call({from: accounts[0]});
-      this.setState({ currentPrice, balance });
-  }
+    async componentDidMount() {
+        const accounts = await web3.eth.getAccounts();
+        this.setState({
+            bjpVotes: await election.methods.candidates(1).call(),
+            incVotes: await election.methods.candidates(2).call(),
+            aapVotes: await election.methods.candidates(3).call(),
+            sipVotes: await election.methods.candidates(4).call(),
+            notaVotes: await election.methods.candidates(5).call()
+        });
+    }
 
-  onBuy = async event => {
-      event.preventDefault();
-      const accounts = await web3.eth.getAccounts();
-      this.setState({message: 'Processing your transaction. Please wait for 15-30 seconds.'});
-      await energyCredits.methods.purchaseCredits(Number(this.state.creditsToBuy)).send({
-          from: accounts[0],
-          value: Number(this.state.currentPrice)*Number(this.state.creditsToBuy)
-      });
-      this.setState({message: 'Transaction successfully processed.', balance: await energyCredits.methods.getBalance().call({from: accounts[0]})});
-  };
-  render() {
-    return (
-      <div>
-        <h2>Buy energy credits today!</h2>
-        <p>Current energy credit price is {web3.utils.fromWei(this.state.currentPrice, 'ether')} ETH.</p>
-        <p>Energy credits in your Account are {this.state.balance}</p>
+    onVote = async event => {
+        event.preventDefault();
+        const accounts = await web3.eth.getAccounts();
+        this.setState({message: 'Casting your vote... Please wait for 15-30 seconds.'});
+        try {
+            await election.methods.vote(this.state.candidateId).send({from: accounts[0]});
+        } catch (e) {
+            if (e.toString().includes('revert')) {
+                this.setState({ message: 'You may not vote twice.'});
+                return
+            }
+            this.setState({ message: 'Your vote has been successfully cast.'})
+        }
 
-          <hr/>
+        this.setState({message: 'Transaction successfully processed.'});
+    };
 
-          <form onSubmit={this.onBuy}>
-              <h4>Buy energy credits today!</h4>
-              <div>
-                  <label>Amount of energy credits you want to buy</label>
-                  <input
-                      value={this.state.creditsToBuy}
-                      onChange={event => this.setState({creditsToBuy: event.target.value})}
-                  />
-              </div>
-              <button>Buy</button>
-          </form>
+    render() {
+        return (
+            <div>
+                <h2>Vote for your candidate</h2>
 
-          <hr/>
+                <hr/>
 
-          <h1>{this.state.message}</h1>
-      </div>
-    );
-  }
+                <form onSubmit={this.onVote}>
+                    <h4>Vote for your preferred candidate. The available options are:</h4>
+                    <ol>
+                        <li>BJP</li>
+                        <li>INC</li>
+                        <li>AAP</li>
+                        <li>SIP</li>
+                        <li>NOTA</li>
+                    </ol>
+
+                    <div>
+                        <label>S.no of the candidate you want to vote for: </label>
+                        <input
+                            value={this.state.candidateId}
+                            onChange={event => this.setState({candidateId: event.target.value})}
+                        />
+                    </div>
+                    <button>Vote</button>
+                </form>
+
+                <hr/>
+
+                <h1>{this.state.message}</h1>
+
+                <hr/>
+
+                <ul>
+                    <li>Number of votes for BJP: {this.state.bjpVotes.voteCount}</li>
+                    <li>Number of votes for INC: {this.state.incVotes.voteCount}</li>
+                    <li>Number of votes for AAP: {this.state.aapVotes.voteCount}</li>
+                    <li>Number of votes for SIP: {this.state.sipVotes.voteCount}</li>
+                    <li>Number of votes for NOTA: {this.state.notaVotes.voteCount}</li>
+                </ul>
+            </div>
+        );
+    }
 }
 
 export default App;
