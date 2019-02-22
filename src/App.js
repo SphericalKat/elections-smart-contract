@@ -6,7 +6,7 @@ import election from './election';
 class App extends Component {
     state = {
         candidateId: '',
-        message: '',
+        message: 'Ready to vote.',
         bjpVotes: 0,
         incVotes: 0,
         aapVotes: 0,
@@ -15,7 +15,7 @@ class App extends Component {
     };
 
     async componentDidMount() {
-        const accounts = await web3.eth.getAccounts();
+        //const accounts = await web3.eth.getAccounts();
         this.setState({
             bjpVotes: await election.methods.candidates(1).call(),
             incVotes: await election.methods.candidates(2).call(),
@@ -44,44 +44,40 @@ class App extends Component {
 
     render() {
         return (
-            <div>
-                <h2>Vote for your candidate</h2>
+            <div
+                className={'parent_div'}>
+                <h1>Vote for your candidate</h1>
+
+                <hr/>
+                <div className='form-updates'>
+                    <form onSubmit={this.onVote}>
+                        <h4>Vote for your preferred candidate. The available options are:</h4>
+                        <ol>
+                            <li>BJP: {this.state.bjpVotes.voteCount} votes</li>
+                            <li>INC: {this.state.incVotes.voteCount} votes</li>
+                            <li>AAP: {this.state.aapVotes.voteCount} votes</li>
+                            <li>SIP: {this.state.sipVotes.voteCount} votes</li>
+                            <li>NOTA: {this.state.notaVotes.voteCount} votes</li>
+                        </ol>
+
+                        <div>
+                            <label>S.no of the candidate you want to vote for: </label>
+                            <input
+                                value={this.state.candidateId}
+                                onChange={event => this.setState({candidateId: event.target.value})}
+                                className='form-control'
+                            />
+                        </div>
+                        <button
+                            className='btn btn-lg btn-primary btn-block'>Vote</button>
+                    </form>
+                </div>
 
                 <hr/>
 
-                <form onSubmit={this.onVote}>
-                    <h4>Vote for your preferred candidate. The available options are:</h4>
-                    <ol>
-                        <li>BJP</li>
-                        <li>INC</li>
-                        <li>AAP</li>
-                        <li>SIP</li>
-                        <li>NOTA</li>
-                    </ol>
-
-                    <div>
-                        <label>S.no of the candidate you want to vote for: </label>
-                        <input
-                            value={this.state.candidateId}
-                            onChange={event => this.setState({candidateId: event.target.value})}
-                        />
-                    </div>
-                    <button>Vote</button>
-                </form>
+                <h2>{this.state.message}</h2>
 
                 <hr/>
-
-                <h1>{this.state.message}</h1>
-
-                <hr/>
-
-                <ul>
-                    <li>Number of votes for BJP: {this.state.bjpVotes.voteCount}</li>
-                    <li>Number of votes for INC: {this.state.incVotes.voteCount}</li>
-                    <li>Number of votes for AAP: {this.state.aapVotes.voteCount}</li>
-                    <li>Number of votes for SIP: {this.state.sipVotes.voteCount}</li>
-                    <li>Number of votes for NOTA: {this.state.notaVotes.voteCount}</li>
-                </ul>
             </div>
         );
     }
